@@ -24,3 +24,13 @@ Score: 10
 Score: 5
 >>>>>>> 7eb6015166778b68027b43da9390d13fd7b0ba3f
 Score: 4
+Score: 20
+Score: 2
+Score: 16
+Score: 5
+Score: 15
+Score: 0
+Score: 9
+Score: 5
+Score: 10
+Score: 11
