@@ -7,11 +7,13 @@ import numpy as np
 pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
 
+
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
     UP = 3
     DOWN = 4
+
 
 Point = namedtuple('Point', 'x, y')
 
@@ -26,6 +28,7 @@ BLOCK_SIZE = 20
 DEFAULT_SPEED = 10
 AI_SPEED = 40
 
+
 class SnakeGameAI:
 
     def __init__(self, w=640, h=480):
@@ -37,6 +40,9 @@ class SnakeGameAI:
         self.reset()
 
     def reset(self):
+        """
+        This method simply resets the position of the snake in case of losing the game.
+        """
         self.direction = Direction.RIGHT
         self.head = Point(self.w / 2, self.h / 2)
         self.snake = [self.head,
@@ -49,6 +55,9 @@ class SnakeGameAI:
         self.speed = DEFAULT_SPEED
 
     def _place_food(self):
+        """
+
+        """
         x = random.randint(0, (self.w - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
         y = random.randint(0, (self.h - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
         self.food = Point(x, y)
@@ -81,9 +90,9 @@ class SnakeGameAI:
 
         # 2. move
         if not controlled_by_player:
-            self._move(action)  # update the head based on AI action
+            self._move(action)
         else:
-            self._move([1, 0, 0])  # move forward in the current direction
+            self._move([1, 0, 0])
 
         self.snake.insert(0, self.head)
 
@@ -156,9 +165,11 @@ class SnakeGameAI:
             y -= BLOCK_SIZE
         self.head = Point(x, y)
 
+
 def save_score(score):
     with open("scores.txt", "a") as file:
         file.write(f"Score: {score}\n")
+
 
 def display_prompt(screen, width, height, score):
     screen.fill(BLACK)
@@ -178,6 +189,7 @@ def display_prompt(screen, width, height, score):
                 elif event.key == pygame.K_n:
                     return False
 
+
 def play_game():
     game = SnakeGameAI()
     controlled_by_player = True
@@ -190,6 +202,3 @@ def play_game():
             else:
                 pygame.quit()
                 quit()
-
-if __name__ == "__main__":
-    play_game()
