@@ -1,3 +1,5 @@
+import os
+
 import pygame
 import sys
 import agent
@@ -9,8 +11,8 @@ class Button:
         self.x = x
         self.y = y
         self.text = text
-        self.width = 150
-        self.height = 30
+        self.width = 200
+        self.height = 50
         self.image = pygame.image.load(path)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))  # Scale image
 
@@ -27,11 +29,11 @@ class ScoreBoard:
         self.screen = screen
         pygame.font.init()
         self.font = pygame.font.SysFont('arial', 30)
-        self.exit_button = Button((0, 255, 0), 700, 50, 'Exit', 'Photos/Buttons/ExitButton.png')
+        self.exit_button = Button((0, 255, 0), 800, 50, 'Exit', 'Photos/Buttons/ExitButton.png')
         self.working = True
         self.scroll = 0
         self.image = pygame.image.load('Photos/scoreBoardImage.jpg')
-        self.image = pygame.transform.scale(self.image, (800, 800))
+        self.image = pygame.transform.scale(self.image, (1024, 1024))
         self.load_scores_from_file()  # Load scores from file on initialization
 
     def load_scores_from_file(self):
@@ -54,7 +56,7 @@ class ScoreBoard:
             color = (255, 0, 0) if i < 3 else (255, 255, 255)  # Highlight top 3 scores in red
             text = self.font.render(f'Score {i + 1}: {score}', True, color)
             textHS = self.font.render(f'Generation: {len(self.scores)}', True, (255, 255, 255))
-            self.screen.blit(textHS, (700, 20))
+            self.screen.blit(textHS, (800, 20))
             self.screen.blit(text, (50, 50 + i * 20 - self.scroll))
         self.exit_button.draw(self.screen)
         pygame.display.flip()
@@ -81,28 +83,24 @@ class ScoreBoard:
 class Menu:
     def __init__(self):
         pygame.display.set_caption('Snake AI')
-        self.screen = pygame.display.set_mode((800, 800))
+        self.screen = pygame.display.set_mode((1024, 1024))
         self.working = True
         self.clock = pygame.time.Clock()
         self.image = pygame.image.load('Photos/menuImage.jpg')
-        self.image = pygame.transform.scale(self.image, (800, 800))
+        self.image = pygame.transform.scale(self.image, (1024, 1024))
 
-        button_width = 150
-        screen_width = 800
+        button_width = 200
+        screen_width = 1024
 
         x_centered = (screen_width - button_width) // 2
+        y_main = 950
 
-        start_button_y = 600
-        exit_button_y = 650
-        scoreboard_button_y = 700
-        snakeml_button_y = 750
-
-        self.start_button = Button((255, 5, 5), x_centered, start_button_y, 'Start', 'Photos/Buttons/StartButton.png')
-        self.exit_button = Button((0, 255, 0), x_centered, exit_button_y, 'Exit', 'Photos/Buttons/ExitButton.png')
-        self.scoreboard_button = Button((0, 255, 0), x_centered, scoreboard_button_y, 'Score Board',
+        self.start_button = Button((255, 5, 5), x_centered-400, y_main, 'Start', 'Photos/Buttons/StartButton.png')
+        self.exit_button = Button((0, 255, 0), x_centered+400, y_main, 'Exit', 'Photos/Buttons/ExitButton.png')
+        self.scoreboard_button = Button((0, 255, 0), x_centered+150, y_main, 'Score Board',
                                         'Photos/Buttons/ScoreBoardButton.png')
-        self.snakeml_button = Button((0, 255, 0), x_centered, snakeml_button_y, 'Snake Ml',
-                                     'Photos/Buttons/StartButton.png')
+        self.snakeml_button = Button((0, 255, 0), x_centered-150, y_main, 'Snake Ml',
+                                     'Photos/Buttons/AIButton.png')
         self.scoreboard = ScoreBoard(self.screen)
 
     def menu(self):
@@ -111,6 +109,12 @@ class Menu:
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.QUIT:
                     self.working = False
+                    try:
+                        pygame.quit()
+                        sys.exit()
+                    except SystemExit:
+                        pygame.quit()
+                        os._exit(0)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.start_button.is_over(pos):
                         game.play_game()
