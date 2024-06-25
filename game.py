@@ -24,6 +24,7 @@ BLACK = (0, 0, 0)
 
 BLOCK_SIZE = 20
 DEFAULT_SPEED = 10
+AI_SPEED = 40
 
 class SnakeGameAI:
 
@@ -37,12 +38,10 @@ class SnakeGameAI:
 
     def reset(self):
         self.direction = Direction.RIGHT
-
         self.head = Point(self.w / 2, self.h / 2)
         self.snake = [self.head,
                       Point(self.head.x - BLOCK_SIZE, self.head.y),
                       Point(self.head.x - (2 * BLOCK_SIZE), self.head.y)]
-
         self.score = 0
         self.food = None
         self._place_food()
@@ -56,9 +55,11 @@ class SnakeGameAI:
         if self.food in self.snake:
             self._place_food()
 
-    def play_step(self, action=None, controlled_by_player=False, speed=DEFAULT_SPEED):
+    def play_step(self, action=None, controlled_by_player=False):
         self.frame_iteration += 1
-        self.speed = speed
+
+        self.speed = DEFAULT_SPEED if controlled_by_player else AI_SPEED
+
         # 1. collect user input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -118,28 +119,22 @@ class SnakeGameAI:
         # hits itself
         if pt in self.snake[1:]:
             return True
-
         return False
 
     def _update_ui(self):
         self.display.fill(BLACK)
-
         for pt in self.snake:
             pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
             pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12))
-
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
-
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
         pygame.display.flip()
 
     def _move(self, action):
         # [straight, right, left]
-
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
-
         if np.array_equal(action, [1, 0, 0]):
             new_dir = clock_wise[idx]  # no change
         elif np.array_equal(action, [0, 1, 0]):
@@ -148,9 +143,7 @@ class SnakeGameAI:
         else:  # [0, 0, 1]
             next_idx = (idx - 1) % 4
             new_dir = clock_wise[next_idx]  # left turn r -> u -> l -> d
-
         self.direction = new_dir
-
         x = self.head.x
         y = self.head.y
         if self.direction == Direction.RIGHT:
@@ -161,7 +154,6 @@ class SnakeGameAI:
             y += BLOCK_SIZE
         elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
-
         self.head = Point(x, y)
 
 def save_score(score):
@@ -175,7 +167,6 @@ def display_prompt(screen, width, height, score):
     screen.blit(text1, [width // 2 - 150, height // 2 - 50])
     screen.blit(text2, [width // 2 - 150, height // 2])
     pygame.display.flip()
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -190,10 +181,8 @@ def display_prompt(screen, width, height, score):
 def play_game():
     game = SnakeGameAI()
     controlled_by_player = True
-
     while True:
-        reward, game_over, score = game.play_step(controlled_by_player=controlled_by_player, speed=game.speed)
-
+        reward, game_over, score = game.play_step(controlled_by_player=controlled_by_player)
         if game_over:
             save_score(score)
             if display_prompt(game.display, game.w, game.h, score):
@@ -201,3 +190,6 @@ def play_game():
             else:
                 pygame.quit()
                 quit()
+
+if __name__ == "__main__":
+    play_game()
