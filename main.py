@@ -202,8 +202,6 @@ class Menu:
                         sys.exit()
                     if self.scoreboard_button.is_over(pos):
                         self.scoreboard.add_score(100)
-                        self.scoreboard.add_score(200)
-                        self.scoreboard.add_score(300)
                         print('clicked the scoreboard button')
                         self.scoreboard.display()
                     if self.snakeml_button.is_over(pos):

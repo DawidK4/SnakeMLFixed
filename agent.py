@@ -1,10 +1,12 @@
+import threading
+
 import torch
 import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
-from stats import plot
+from stats import plot, RealTimePlotter, start_plotter
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -160,6 +162,9 @@ def train():
     record = 0
     agent = Agent()
     game = SnakeGameAI()
+    plotter = RealTimePlotter()
+    thread = threading.Thread(target=start_plotter, args=(plotter,))
+    thread.start()
     while True:
         # get old state
         state_old = agent.get_state(game)
@@ -196,4 +201,4 @@ def train():
 
             # Debugging statement to check if plot function is being called
             print("Plotting scores and mean scores")
-            plot(plot_scores, plot_mean_scores)
+            plotter.update_plot(plot_scores, plot_mean_scores)
