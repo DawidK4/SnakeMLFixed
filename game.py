@@ -7,11 +7,13 @@ import numpy as np
 pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
 
+
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
     UP = 3
     DOWN = 4
+
 
 Point = namedtuple('Point', 'x, y')
 
@@ -26,6 +28,7 @@ BLOCK_SIZE = 20
 DEFAULT_SPEED = 10
 AI_SPEED = 40
 
+
 class SnakeGameAI:
 
     def __init__(self, w=640, h=480):
@@ -35,6 +38,38 @@ class SnakeGameAI:
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
+        self.background = pygame.image.load('Photos/tile.png')
+        self.background = pygame.transform.scale(self.background, (self.w, self.h))
+        self.apple = pygame.image.load('Photos/apple.png')
+        self.apple = pygame.transform.scale(self.apple, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_head_right = pygame.image.load('Photos/Snake_Head/Head_Right.png')
+        self.snake_head_left = pygame.image.load('Photos/Snake_Head/Head_Left.png')
+        self.snake_head_up = pygame.image.load('Photos/Snake_Head/Head_Up.png')
+        self.snake_head_down = pygame.image.load('Photos/Snake_Head/Head_Down.png')
+        self.snake_head_right = pygame.transform.scale(self.snake_head_right, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_head_left = pygame.transform.scale(self.snake_head_left, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_head_up = pygame.transform.scale(self.snake_head_up, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_head_down = pygame.transform.scale(self.snake_head_down, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_vertical = pygame.image.load('Photos/Snake_Body/Body_Vertical.png')
+        self.snake_body_horizontal = pygame.image.load('Photos/Snake_Body/Body_Horizontal.png')
+        self.snake_body_vertical = pygame.transform.scale(self.snake_body_vertical, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_horizontal = pygame.transform.scale(self.snake_body_horizontal, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_tail_right = pygame.image.load('Photos/Snake_Tail/Tail_Right.png')
+        self.snake_tail_left = pygame.image.load('Photos/Snake_Tail/Tail_Left.png')
+        self.snake_tail_up = pygame.image.load('Photos/Snake_Tail/Tail_Up.png')
+        self.snake_tail_down = pygame.image.load('Photos/Snake_Tail/Tail_Down.png')
+        self.snake_tail_right = pygame.transform.scale(self.snake_tail_right, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_tail_left = pygame.transform.scale(self.snake_tail_left, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_tail_up = pygame.transform.scale(self.snake_tail_up, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_tail_down = pygame.transform.scale(self.snake_tail_down, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_bend_rd = pygame.image.load('Photos/Snake_Bend/Right_Down.png')
+        self.snake_body_bend_ld = pygame.image.load('Photos/Snake_Bend/Left_Down.png')
+        self.snake_body_bend_ru = pygame.image.load('Photos/Snake_Bend/Right_Up.png')
+        self.snake_body_bend_lu = pygame.image.load('Photos/Snake_Bend/Left_Up.png')
+        self.snake_body_bend_rd = pygame.transform.scale(self.snake_body_bend_rd, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_bend_ld = pygame.transform.scale(self.snake_body_bend_ld, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_bend_ru = pygame.transform.scale(self.snake_body_bend_ru, (BLOCK_SIZE, BLOCK_SIZE))
+        self.snake_body_bend_lu = pygame.transform.scale(self.snake_body_bend_lu, (BLOCK_SIZE, BLOCK_SIZE))
 
     def reset(self):
         self.direction = Direction.RIGHT
@@ -122,11 +157,50 @@ class SnakeGameAI:
         return False
 
     def _update_ui(self):
-        self.display.fill(BLACK)
-        for pt in self.snake:
-            pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12))
-        pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+        self.display.blit(self.background, (0, 0))
+        for index, pt in enumerate(self.snake):
+            if index == 0:
+                if self.direction == Direction.RIGHT:
+                    self.display.blit(self.snake_head_right, (pt.x, pt.y))
+                elif self.direction == Direction.LEFT:
+                    self.display.blit(self.snake_head_left, (pt.x, pt.y))
+                elif self.direction == Direction.UP:
+                    self.display.blit(self.snake_head_up, (pt.x, pt.y))
+                elif self.direction == Direction.DOWN:
+                    self.display.blit(self.snake_head_down, (pt.x, pt.y))
+            else:  # this is the body
+                if index < len(self.snake) - 1:  # if not the tail
+                    next_pt = self.snake[index + 1]
+                    prev_pt = self.snake[index - 1]
+                    if prev_pt.x < pt.x == next_pt.x < next_pt.y:  # bend right down
+                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
+                    elif prev_pt.x > pt.x == next_pt.x < next_pt.y:  # bend left down
+                        self.display.blit(self.snake_body_bend_lu, (pt.x, pt.y))
+                    elif prev_pt.x < pt.x == next_pt.x > next_pt.y:  # bend right up
+                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
+                    elif prev_pt.x > pt.x == next_pt.x > next_pt.y:  # bend left up
+                        self.display.blit(self.snake_body_bend_ld, (pt.x, pt.y))
+                    elif prev_pt.y < pt.y == next_pt.y < next_pt.x:  # bend down right
+                        self.display.blit(self.snake_body_bend_ru, (pt.x, pt.y))
+                    elif pt.x == next_pt.x:  # vertical
+                        self.display.blit(self.snake_body_vertical, (pt.x, pt.y))
+                    else:  # horizontal
+                        self.display.blit(self.snake_body_horizontal, (pt.x, pt.y))
+                else:
+                    next_pt = self.snake[index - 1]
+                if pt.x > next_pt.x:
+                    self.tail = self.snake_tail_right
+                    self.display.blit(self.snake_tail_right, (pt.x, pt.y))
+                elif pt.x < next_pt.x:
+                    self.tail = self.snake_tail_left
+                    self.display.blit(self.snake_tail_left, (pt.x, pt.y))
+                elif pt.y > next_pt.y:
+                    self.tail = self.snake_tail_down
+                    self.display.blit(self.snake_tail_down, (pt.x, pt.y))
+                elif pt.y < next_pt.y:
+                    self.tail = self.snake_tail_up
+                    self.display.blit(self.snake_tail_up, (pt.x, pt.y))
+        self.display.blit(self.apple, (self.food.x, self.food.y))
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
         pygame.display.flip()
@@ -156,9 +230,11 @@ class SnakeGameAI:
             y -= BLOCK_SIZE
         self.head = Point(x, y)
 
+
 def save_score(score):
     with open("scores.txt", "a") as file:
         file.write(f"Score: {score}\n")
+
 
 def display_prompt(screen, width, height, score):
     screen.fill(BLACK)
@@ -178,6 +254,7 @@ def display_prompt(screen, width, height, score):
                 elif event.key == pygame.K_n:
                     return False
 
+
 def play_game():
     game = SnakeGameAI()
     controlled_by_player = True
@@ -190,6 +267,7 @@ def play_game():
             else:
                 pygame.quit()
                 quit()
+
 
 if __name__ == "__main__":
     play_game()
