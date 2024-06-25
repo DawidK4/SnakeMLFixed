@@ -238,15 +238,21 @@ class SnakeGameAI:
                     prev_pt = self.snake[index - 1]
 
                     if prev_pt.x < pt.x and next_pt.y > pt.y:  # bend right down
-                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
-                    elif prev_pt.x > pt.x and next_pt.y > pt.y:  # bend left down
-                        self.display.blit(self.snake_body_bend_lu, (pt.x, pt.y))
-                    elif prev_pt.x < pt.x and next_pt.y < pt.y:  # bend right up
-                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
-                    elif prev_pt.x > pt.x and next_pt.y < pt.y:  # bend left up
                         self.display.blit(self.snake_body_bend_ld, (pt.x, pt.y))
+                    elif prev_pt.x > pt.x and next_pt.y > pt.y:  # bend left down
+                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
+                    elif prev_pt.x < pt.x and next_pt.y < pt.y:  # bend right up
+                        self.display.blit(self.snake_body_bend_lu, (pt.x, pt.y))
+                    elif prev_pt.x > pt.x and next_pt.y < pt.y:  # bend left up
+                        self.display.blit(self.snake_body_bend_ru, (pt.x, pt.y))
                     elif prev_pt.y < pt.y and next_pt.x > pt.x:  # bend down right
                         self.display.blit(self.snake_body_bend_ru, (pt.x, pt.y))
+                    elif prev_pt.y < pt.y and next_pt.x < pt.x:  # bend down left
+                        self.display.blit(self.snake_body_bend_lu, (pt.x, pt.y))
+                    elif prev_pt.y > pt.y and next_pt.x > pt.x:  # bend up right
+                        self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
+                    elif prev_pt.y > pt.y and next_pt.x < pt.x:  # bend up left
+                        self.display.blit(self.snake_body_bend_ld, (pt.x, pt.y))
                     elif pt.x == next_pt.x:  # vertical
                         self.display.blit(self.snake_body_vertical, (pt.x, pt.y))
                     else:  # horizontal
