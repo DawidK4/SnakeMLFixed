@@ -1,0 +1,13 @@
+Supervised learning - Bellman equation
+
+Has to be added to virtual env:
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install pygame
+pip install matplotlib ipython
+
+Deque allows user to append elements from left and right side.
+
+Namedtuple creates a lightweight tuple class. Its attributes can be accessed via aliases ('y' and 'x').
+
+
+
