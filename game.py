@@ -72,6 +72,9 @@ class SnakeGameAI:
         self.snake_body_bend_lu = pygame.transform.scale(self.snake_body_bend_lu, (BLOCK_SIZE, BLOCK_SIZE))
 
     def reset(self):
+        """
+        This method simply resets the position of the snake in case of losing the game.
+        """
         self.direction = Direction.RIGHT
         self.head = Point(self.w / 2, self.h / 2)
         self.snake = [self.head,
@@ -84,6 +87,9 @@ class SnakeGameAI:
         self.speed = DEFAULT_SPEED
 
     def _place_food(self):
+        """
+        This method spawns an apple in a random place.
+        """
         x = random.randint(0, (self.w - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
         y = random.randint(0, (self.h - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
         self.food = Point(x, y)
@@ -91,6 +97,34 @@ class SnakeGameAI:
             self._place_food()
 
     def play_step(self, action=None, controlled_by_player=False):
+        """
+        Execute one step of the game.
+
+        This method updates the game state by processing user input, moving the snake,
+        checking for collisions, placing new food, updating the UI, and managing the game speed.
+        It can operate in two modes: controlled by a player or an AI.
+
+        Args:
+            action (list or None): The action to be taken by the AI, typically a list of
+            [turn_left, go_straight, turn_right].
+                                   Ignored if controlled_by_player is True.
+            controlled_by_player (bool): If True, the game is controlled by the player using keyboard input.
+                                         If False, the game is controlled by the AI using the action parameter.
+
+        Returns:
+            tuple:
+                reward (int): The reward obtained from this step. Positive if food is eaten, negative
+                if collision occurs.
+                game_over (bool): True if the game has ended, False otherwise.
+                score (int): The current score of the game.
+
+        Raises:
+            pygame.error: If there is an issue with the Pygame library (e.g., during event handling).
+
+        Examples:
+            -reward, game_over, score = game.play_step([1, 0, 0], False)
+            -reward, game_over, score = game.play_step(controlled_by_player=True)
+        """
         self.frame_iteration += 1
 
         self.speed = DEFAULT_SPEED if controlled_by_player else AI_SPEED
@@ -116,9 +150,9 @@ class SnakeGameAI:
 
         # 2. move
         if not controlled_by_player:
-            self._move(action)  # update the head based on AI action
+            self._move(action)
         else:
-            self._move([1, 0, 0])  # move forward in the current direction
+            self._move([1, 0, 0])
 
         self.snake.insert(0, self.head)
 
@@ -146,6 +180,24 @@ class SnakeGameAI:
         return reward, game_over, self.score
 
     def is_collision(self, pt=None):
+        """
+        Check if a point collides with the boundaries of the game area or the snake itself.
+
+        This method determines whether the given point (or the snake's head by default)
+        collides with the boundaries of the game area or intersects with any part of the snake's body.
+
+        Args:
+            pt (Point, optional): The point to check for collision. If None, the method uses the snake's head.
+
+        Returns:
+            bool: True if the point collides with the boundary or the snake's body, False otherwise.
+
+        Examples:
+            -is_collision(Point(5, 5))
+            False
+            -is_collision()
+            True if the snake's head is out of bounds or hits itself, False otherwise.
+        """
         if pt is None:
             pt = self.head
         # hits boundary
@@ -157,9 +209,21 @@ class SnakeGameAI:
         return False
 
     def _update_ui(self):
+        """
+        Update the game's user interface.
+
+        This method renders the game's background, the snake with its head, body, and tail
+        oriented correctly based on its current direction, the food, and the current score.
+        It then updates the display to reflect these changes.
+
+        Raises:
+            pygame.error: If there is an issue with rendering using the Pygame library.
+
+        """
         self.display.blit(self.background, (0, 0))
+
         for index, pt in enumerate(self.snake):
-            if index == 0:
+            if index == 0:  # render the snake's head
                 if self.direction == Direction.RIGHT:
                     self.display.blit(self.snake_head_right, (pt.x, pt.y))
                 elif self.direction == Direction.LEFT:
@@ -168,19 +232,20 @@ class SnakeGameAI:
                     self.display.blit(self.snake_head_up, (pt.x, pt.y))
                 elif self.direction == Direction.DOWN:
                     self.display.blit(self.snake_head_down, (pt.x, pt.y))
-            else:  # this is the body
+            else:  # render the snake's body and tail
                 if index < len(self.snake) - 1:  # if not the tail
                     next_pt = self.snake[index + 1]
                     prev_pt = self.snake[index - 1]
-                    if prev_pt.x < pt.x == next_pt.x < next_pt.y:  # bend right down
+
+                    if prev_pt.x < pt.x and next_pt.y > pt.y:  # bend right down
                         self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
-                    elif prev_pt.x > pt.x == next_pt.x < next_pt.y:  # bend left down
+                    elif prev_pt.x > pt.x and next_pt.y > pt.y:  # bend left down
                         self.display.blit(self.snake_body_bend_lu, (pt.x, pt.y))
-                    elif prev_pt.x < pt.x == next_pt.x > next_pt.y:  # bend right up
+                    elif prev_pt.x < pt.x and next_pt.y < pt.y:  # bend right up
                         self.display.blit(self.snake_body_bend_rd, (pt.x, pt.y))
-                    elif prev_pt.x > pt.x == next_pt.x > next_pt.y:  # bend left up
+                    elif prev_pt.x > pt.x and next_pt.y < pt.y:  # bend left up
                         self.display.blit(self.snake_body_bend_ld, (pt.x, pt.y))
-                    elif prev_pt.y < pt.y == next_pt.y < next_pt.x:  # bend down right
+                    elif prev_pt.y < pt.y and next_pt.x > pt.x:  # bend down right
                         self.display.blit(self.snake_body_bend_ru, (pt.x, pt.y))
                     elif pt.x == next_pt.x:  # vertical
                         self.display.blit(self.snake_body_vertical, (pt.x, pt.y))
@@ -188,21 +253,20 @@ class SnakeGameAI:
                         self.display.blit(self.snake_body_horizontal, (pt.x, pt.y))
                 else:
                     next_pt = self.snake[index - 1]
-                if pt.x > next_pt.x:
-                    self.tail = self.snake_tail_right
-                    self.display.blit(self.snake_tail_right, (pt.x, pt.y))
-                elif pt.x < next_pt.x:
-                    self.tail = self.snake_tail_left
-                    self.display.blit(self.snake_tail_left, (pt.x, pt.y))
-                elif pt.y > next_pt.y:
-                    self.tail = self.snake_tail_down
-                    self.display.blit(self.snake_tail_down, (pt.x, pt.y))
-                elif pt.y < next_pt.y:
-                    self.tail = self.snake_tail_up
-                    self.display.blit(self.snake_tail_up, (pt.x, pt.y))
+                    if pt.x > next_pt.x:
+                        self.display.blit(self.snake_tail_right, (pt.x, pt.y))
+                    elif pt.x < next_pt.x:
+                        self.display.blit(self.snake_tail_left, (pt.x, pt.y))
+                    elif pt.y > next_pt.y:
+                        self.display.blit(self.snake_tail_down, (pt.x, pt.y))
+                    elif pt.y < next_pt.y:
+                        self.display.blit(self.snake_tail_up, (pt.x, pt.y))
+
         self.display.blit(self.apple, (self.food.x, self.food.y))
+
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
+
         pygame.display.flip()
 
     def _move(self, action):
@@ -232,11 +296,38 @@ class SnakeGameAI:
 
 
 def save_score(score):
+    """
+    Save the score to a file.
+
+    This method appends the given score to a file named "scores.txt".
+
+    Args:
+        score (int): The score to be saved.
+    """
     with open("scores.txt", "a") as file:
         file.write(f"Score: {score}\n")
 
 
 def display_prompt(screen, width, height, score):
+    """
+    Display the game over prompt and handle user input.
+
+    This method fills the screen with a game over message and instructions for the player
+    to either play again or quit. It waits for the player's input and returns a boolean
+    indicating whether the player chose to play again.
+
+    Args:
+        screen (pygame.Surface): The Pygame screen surface to display the prompt.
+        width (int): The width of the screen.
+        height (int): The height of the screen.
+        score (int): The player's score to be displayed.
+
+    Returns:
+        bool: True if the player chooses to play again, False if the player chooses to quit.
+
+    Raises:
+        pygame.error: If there is an issue with rendering or handling events using the Pygame library.
+    """
     screen.fill(BLACK)
     text1 = font.render(f"Game Over! Your Score: {score}", True, WHITE)
     text2 = font.render("Press Y to Play Again or N to Quit", True, WHITE)
@@ -256,6 +347,16 @@ def display_prompt(screen, width, height, score):
 
 
 def play_game():
+    """
+    Start and run the main game loop.
+
+    This method initializes the game, runs the main game loop, and handles game over conditions.
+    It saves the player's score and displays a prompt for the player to either play again or quit.
+    The game is controlled by the player.
+
+    Raises:
+        pygame.error: If there is an issue with the Pygame library during game execution.
+    """
     game = SnakeGameAI()
     controlled_by_player = True
     while True:
