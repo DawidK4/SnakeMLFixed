@@ -21,7 +21,7 @@ class Linear_QNet(nn.Module):
 
     def forward(self, x):
         """
-        Define the forward pass of the network. Uses ReLU activation function (f(x) = max(0, u).
+        Define the forward pass of the network. Uses ReLU activation function (f(x) = max(0, u)).
 
         Args:
             x (torch.Tensor): The input tensor.
