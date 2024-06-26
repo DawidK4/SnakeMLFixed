@@ -4,6 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 
+
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         """
@@ -20,7 +21,7 @@ class Linear_QNet(nn.Module):
 
     def forward(self, x):
         """
-        Define the forward pass of the network.
+        Define the forward pass of the network. Uses ReLU activation function (f(x) = max(0, u).
 
         Args:
             x (torch.Tensor): The input tensor.
@@ -61,6 +62,7 @@ class QTrainer:
         self.gamma = gamma
         self.model = model
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
+        # MSE is a mean squared error function, measures the difference between predicted and actual Q-values
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
@@ -77,6 +79,8 @@ class QTrainer:
         This method calculates the predicted Q-values, the target Q-values using the Bellman equation,
         computes the loss, and updates the model parameters.
         """
+        # Conversion to the PyTorch tensors.
+        # (n, x)
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
@@ -84,6 +88,7 @@ class QTrainer:
 
         if len(state.shape) == 1:
             # Reshape the inputs to be batches of size 1 if they are single examples
+            # (1, x)
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)
             action = torch.unsqueeze(action, 0)
@@ -94,9 +99,11 @@ class QTrainer:
         pred = self.model(state)
 
         target = pred.clone()
+        # Updating Q value for every move
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
+                # Bellman equation
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 
             target[idx][torch.argmax(action[idx]).item()] = Q_new

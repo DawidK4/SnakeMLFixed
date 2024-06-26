@@ -109,8 +109,8 @@ class Agent:
         else:
             mini_sample = self.memory
 
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        for state, action, reward, next_state, done in mini_sample:
+            self.trainer.train_step(state, action, reward, next_state, done)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         """
@@ -127,7 +127,16 @@ class Agent:
 
     def get_action(self, state):
         """
-        Decide on an action based on the current state, using an epsilon-greedy policy.
+        Decide on an action based on the current state, using an epsilon-greedy policy. With a probability proportional
+        to epsilon, the method chooses a random action to explore the action space. This ensures that the agent does not
+        always exploit its current knowledge and has a chance to discover new strategies.
+
+        With a probability of 1 - epsilon, the method uses the current policy (represented by the model) to select the best action.
+        It:
+        1. Converts the state to a PyTorch tensor.
+        2. Passes the state tensor through the model to get action predictions (Q-values).
+        3. Selects the action with the highest predicted Q-value.
+        4. Sets the corresponding index in final_move to 1.
 
         Args:
             state (np.array): The current state.
