@@ -1,7 +1,7 @@
 Supervised learning - Bellman equation
 
 Has to be added to virtual env:
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install pygame
 pip install matplotlib ipython
 
